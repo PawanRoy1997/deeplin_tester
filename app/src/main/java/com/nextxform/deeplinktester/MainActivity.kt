@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_UNDEFINED
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources.Theme
 import android.net.Uri
@@ -166,13 +167,20 @@ fun MainScreen(
             )
         }
 
-        Text(
-            text = "History",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Text(
+                text = "History",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            Text(text = "Clear All", style = MaterialTheme.typography.bodyLarge.copy(color = Color.Blue),)
+        }
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(list.size) {
@@ -184,7 +192,7 @@ fun MainScreen(
                             color = MaterialTheme.colorScheme.inverseOnSurface
                         )
                         .defaultMinSize(minHeight = 54.dp)
-                        .padding(8.dp),
+                        .padding(vertical = 8.dp, horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -225,7 +233,12 @@ fun MainScreen(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(name = "Light Mode", showSystemUi = true, uiMode = UI_MODE_NIGHT_NO)
+@Preview(
+    name = "Light Mode",
+    showSystemUi = true,
+    uiMode = UI_MODE_NIGHT_UNDEFINED,
+    showBackground = true
+)
 @Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES, showBackground = true, showSystemUi = true)
 @Composable
 fun MainScreenPreview() {
