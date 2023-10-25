@@ -12,6 +12,7 @@ and efficiently execute deep links and ensure they work as expected.
 - [Features](#features)
 - [Gettting Started](#gettting-started)
 - [How to use](#how-to-use)
+- [Screenshots](#screenshots)
 - [Contributing](#contributing)
 </details>
 
