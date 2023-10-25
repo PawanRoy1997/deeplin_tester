@@ -51,9 +51,13 @@ Using Deep Link Tester is straightforward:
 
 1. Launch the application on your Android device.
 2. In the input field at the top screen, enter the deep link you want to test (e.g., `myapp://profile?user_id=123`)
-3. Press the "Execute" button to trigger the deep link.
+3. Press the "TEST" button to trigger the deep link.
 4. Observe the results in the app, including the URI, host, and any query parameters.
 5. You can test multiple deep links quickly by simply changing the input and tapping "Execute" again.
+
+# Screenshots
+![Screenshot 2023-10-25 174752](https://github.com/PawanRoy1997/deeplin_tester/assets/42890011/ae8769de-2a18-4987-ac41-12e5f674d9bb)
+![Screenshot 2023-10-25 175022](https://github.com/PawanRoy1997/deeplin_tester/assets/42890011/4c4a6a7c-0d68-4eac-b51c-4b7ec3469b8c)
 
 
 # Contributing
