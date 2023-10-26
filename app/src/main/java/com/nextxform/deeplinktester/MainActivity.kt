@@ -2,15 +2,16 @@ package com.nextxform.deeplinktester
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_UNDEFINED
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.content.res.Resources.Theme
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,12 +44,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nextxform.deeplinktester.ui.theme.DeeplinkTesterTheme
+import com.nextxform.deeplinktester.utils.db.DeepLinkEntity
+import com.nextxform.deeplinktester.viewModels.MainViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -77,31 +80,24 @@ class MainActivity : ComponentActivity() {
                         .background(MaterialTheme.colorScheme.background),
 
                     ) {
+                    val viewModel: MainViewModel by viewModels()
+
+                    viewModel.getHistory()
                     MainScreen(
-                        deeplink = { link -> executeDeepLink(link) },
+                        viewModel = viewModel,
                         shareLink = { link -> shareLink(link) },
                         copyLink = { link -> copyLink(link) },
                         modifier = Modifier
                             .padding(it)
                             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                             .fillMaxWidth(),
-                        list = listOf(
-                            "https://play.google.com/store/apps/details?id=com.penguenlabs.deeplinktester1",
-                            "https://play.google.com/store/apps/details?id=com.penguenlabs.deeplinktester2",
-                            "https://play.google.com/store/apps/details?id=com.penguenlabs.deeplinktester3",
-                            "https://play.google.com/store/apps/details?id=com.penguenlabs.deeplinktester4"
-                        )
+                        clearHistory = {
+                            viewModel.clearHistory()
+                        }
                     )
                 }
             }
         }
-    }
-
-    private fun executeDeepLink(link: String) {
-        val intent = Intent()
-        intent.action = Intent.ACTION_VIEW
-        intent.data = Uri.parse(link)
-        startActivity(intent)
     }
 
     private fun shareLink(link: String) {
@@ -123,18 +119,36 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    deeplink: (String) -> Unit,
+    viewModel: MainViewModel,
     shareLink: (String) -> Unit,
     copyLink: (String) -> Unit = {},
     modifier: Modifier,
-    list: List<String> = ArrayList()
+    clearHistory: () -> Unit
 ) {
+
+    val list = viewModel.deepLinkLiveData.value.map(DeepLinkEntity::url).toList()
+    val context: Context = LocalContext.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
         var text by remember { mutableStateOf("") }
-
+        var error by remember { mutableStateOf("") }
+        val deeplink = { url: String ->
+            try {
+                val intent = Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.parse(url)
+                }
+                context.startActivity(intent)
+                viewModel.addNewEntry(url, System.currentTimeMillis())
+            } catch (e: Exception) {
+                error = "Something went wrong!\nPlease check your deep link again"
+                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                viewModel.removeEntry(url)
+            }
+        }
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },
@@ -148,13 +162,24 @@ fun MainScreen(
                         copyLink.invoke(text)
                     }
                 )
-            }
+            },
+            supportingText = {
+                Text(error)
+            },
+            isError = error.isNotEmpty(),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = { deeplink.invoke(text) },
+            onClick = {
+                if (text.trim().isEmpty()) {
+                    error = "Deep Link is Empty"
+                    return@Button
+                }
+                deeplink.invoke(text)
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
 
@@ -179,7 +204,13 @@ fun MainScreen(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-            Text(text = "Clear All", style = MaterialTheme.typography.bodyLarge.copy(color = Color.Blue),)
+            Text(
+                text = "Clear All",
+                style = MaterialTheme.typography.bodyLarge.copy(color = Color.Blue),
+                modifier = Modifier.clickable {
+                    clearHistory.invoke()
+                }
+            )
         }
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -260,17 +291,13 @@ fun MainScreenPreview() {
 
             ) {
             MainScreen(
-                deeplink = {}, modifier = Modifier
+                viewModel = MainViewModel(),
+                modifier = Modifier
                     .padding(it)
                     .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                     .fillMaxWidth(),
                 shareLink = {},
-                list = listOf(
-                    "https://play.google.com/store/apps/details?id=com.penguenlabs.deeplinktester1",
-                    "https://play.google.com/store/apps/details?id=com.penguenlabs.deeplinktester2",
-                    "https://play.google.com/store/apps/details?id=com.penguenlabs.deeplinktester3",
-                    "https://play.google.com/store/apps/details?id=com.penguenlabs.deeplinktester4"
-                )
+                clearHistory = {}
             )
         }
     }
