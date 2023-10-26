@@ -5,7 +5,7 @@ validate deep links withing their mobile apps. Deep links are a powerful way to 
 users to specific content or action withing an app. With Deep Link Tester, you can easily
 and efficiently execute deep links and ensure they work as expected.
 
-<details>
+<details open>
 <summary><h2> Table of Contents</h2></summary>
 
 - [Deep Link Tester](#deep-link-tester)
