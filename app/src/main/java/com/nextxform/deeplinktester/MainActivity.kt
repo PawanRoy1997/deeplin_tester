@@ -179,6 +179,7 @@ fun MainScreen(
                     error = "Deep Link is Empty"
                     return@Button
                 }
+                error = ""
                 deeplink.invoke(text)
             },
             modifier = Modifier.fillMaxWidth(),
