@@ -1,6 +1,7 @@
 package com.nextxform.deeplinktester
 
 import android.content.Intent
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -104,10 +105,12 @@ fun SplashScreen() {
 @Preview()
 @Composable
 fun SplashScreenPreview() {
-    Surface(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.onBackground)
-    ) {
-        SplashScreen()
+    DeeplinkTesterTheme {
+        Surface(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.onBackground)
+        ) {
+            SplashScreen()
+        }
     }
 }
