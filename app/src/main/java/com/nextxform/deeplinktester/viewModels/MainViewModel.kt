@@ -22,7 +22,7 @@ class MainViewModel : ViewModel() {
 
     fun addNewEntry(deepLink: String, time: Long) {
         viewModelScope.launch {
-            if(deepLinkLiveData.value.size == 10)
+            if(deepLinkLiveData.value.size == 100)
                 deepLinkDao.deleteEntry(deepLinkLiveData.value.last().lastUsed)
             deepLinkDao.insertDeepLink(DeepLinkEntity(0, deepLink, time))
             _deepLinkLiveData.value = deepLinkDao.getAllDeepLinks()

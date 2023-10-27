@@ -1,6 +1,7 @@
 package com.nextxform.deeplinktester
 
 import android.content.Intent
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,9 +11,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -80,17 +85,32 @@ fun SplashScreen() {
             contentDescription = ""
         )
         LinearProgressIndicator(modifier = Modifier.width(100.dp))
-        Text(text = "Made with love in India by Next")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Made with ❤️ in India by")
+            Image(
+                painter = painterResource(id = R.drawable.next),
+                contentDescription = "Next",
+                modifier = Modifier.size(24.dp, 24.dp)
+            )
+        }
     }
 }
 
 @Preview()
 @Composable
 fun SplashScreenPreview() {
-    Surface(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.onBackground)
-    ) {
-        SplashScreen()
+    DeeplinkTesterTheme {
+        Surface(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.onBackground)
+        ) {
+            SplashScreen()
+        }
     }
 }
