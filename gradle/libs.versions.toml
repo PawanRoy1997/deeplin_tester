@@ -1,0 +1,9 @@
+[versions]
+applicationPluginVersion = "8.1.4"
+kotlinVersion = "1.9.20"
+kspVersion = "1.9.10-1.0.13"
+
+[plugins]
+application = { id = "com.android.application", version.ref = "applicationPluginVersion" }
+kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+kspPlugin = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }

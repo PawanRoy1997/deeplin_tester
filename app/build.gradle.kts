@@ -1,21 +1,24 @@
+import config.Deps
+import config.AppConfig
+
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.application)
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kspPlugin)
 }
 
 android {
-    namespace = "com.nextxform.deeplinktester"
-    compileSdk = 34
+    namespace = AppConfig.namespace
+    compileSdk = AppConfig.compileSdk
 
     defaultConfig {
-        applicationId = "com.nextxform.deeplinktester"
-        minSdk = 21
-        targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        applicationId = AppConfig.applicationId
+        minSdk = AppConfig.minSdk
+        targetSdk = AppConfig.targetSdk
+        versionCode = AppConfig.versionCode
+        versionName = AppConfig.versionName
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = AppConfig.testInstrumentationRunner
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -40,17 +43,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = AppConfig.sourceCompatibility
+        targetCompatibility = AppConfig.sourceCompatibility
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = AppConfig.sourceTarget
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.4"
     }
     packaging {
         resources {
@@ -61,30 +64,18 @@ android {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.0")
-    implementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation(platform(Deps.Compose.composeBom))
+    androidTestImplementation(platform(Deps.Compose.composeBom))
 
-    val roomVersion = "2.6.0"
-    implementation("androidx.room:room-ktx:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
+    Deps.Core.list.forEach(::implementation)
 
-    val lifeCycleVersion = "2.6.2"
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifeCycleVersion")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifeCycleVersion")
+    Deps.Compose.list.forEach(::implementation)
+    implementation(Deps.Room.room)
+    ksp(Deps.Room.room_ksp)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    Deps.LifeCycle.list.forEach(::implementation)
+
+    Deps.Testing.unitTest.forEach(::testImplementation)
+    Deps.Testing.androidTest.forEach(::androidTestImplementation)
+    Deps.Debug.list.forEach(::debugImplementation)
 }
