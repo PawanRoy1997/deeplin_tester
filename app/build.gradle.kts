@@ -2,9 +2,10 @@ import config.Deps
 import config.AppConfig
 
 plugins {
-    alias(libs.plugins.application)
-    alias(libs.plugins.kotlin)
-    alias(libs.plugins.kspPlugin)
+    id("android-application")
+//    id("kotlin-android")
+//    alias(libs.plugins.kotlin)
+//    alias(libs.plugins.kspPlugin)
 }
 
 android {

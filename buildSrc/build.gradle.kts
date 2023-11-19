@@ -1,7 +1,16 @@
-plugins{
+plugins {
     `kotlin-dsl`
 }
 
-repositories{
+repositories {
     mavenCentral()
+}
+
+gradlePlugin {
+    plugins {
+        create("android-application") {
+            id = "android-application"
+            implementationClass = "plugins.AndroidApplication"
+        }
+    }
 }
