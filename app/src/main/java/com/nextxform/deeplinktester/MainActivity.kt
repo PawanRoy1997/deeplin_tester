@@ -1,5 +1,6 @@
 package com.nextxform.deeplinktester
 
+import android.app.UiModeManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
@@ -51,12 +53,16 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import com.nextxform.deeplinktester.ui.theme.DeeplinkTesterTheme
 import com.nextxform.deeplinktester.utils.db.DeepLinkEntity
 import com.nextxform.deeplinktester.viewModels.MainViewModel
 
 
 class MainActivity : ComponentActivity() {
+
+    private var isDarkMode by mutableStateOf(false)
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,11 +100,20 @@ class MainActivity : ComponentActivity() {
                             .fillMaxWidth(),
                         clearHistory = {
                             viewModel.clearHistory()
-                        }
+                        },
+                        isDarkMode = isDarkMode
                     )
                 }
             }
         }
+
+        checkDarkMode()
+    }
+
+
+    private fun checkDarkMode() {
+        val uiModeManager = this.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+        isDarkMode = uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES
     }
 
     private fun shareLink(link: String) {
@@ -124,7 +139,8 @@ fun MainScreen(
     shareLink: (String) -> Unit,
     copyLink: (String) -> Unit = {},
     modifier: Modifier,
-    clearHistory: () -> Unit
+    clearHistory: () -> Unit,
+    isDarkMode: Boolean = false
 ) {
 
     val list = viewModel.deepLinkLiveData.value.map(DeepLinkEntity::url).toList()
@@ -226,53 +242,77 @@ fun MainScreen(
             )
         }
 
+        val textColor = if(isDarkMode) Color.Gray else Color.DarkGray
+
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(list.size) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.inverseOnSurface
-                        )
-                        .defaultMinSize(minHeight = 54.dp)
-                        .padding(vertical = 8.dp, horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = list[it],
-                        style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
-                        modifier = Modifier.weight(weight = 1f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        imageVector = Icons.Outlined.PlayArrow,
-                        contentDescription = "TEST",
-                        modifier = Modifier
-                            .width(24.dp)
-                            .height(24.dp)
-                            .clickable {
-                                deeplink.invoke(list[it])
-                            },
-                        tint = Color.White,
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Icon(
-                        imageVector = Icons.Outlined.Share,
-                        contentDescription = "SHARE",
-                        modifier = Modifier
-                            .width(24.dp)
-                            .height(24.dp)
-                            .clickable {
-                                shareLink.invoke(list[it])
-                            },
-                        tint = Color.White
-                    )
-                }
+                Item(deeplink = list[it], shareLink = shareLink, execute = deeplink, textColor = textColor)
             }
         }
+    }
+}
+
+@Composable
+fun Item(deeplink: String, shareLink: (String) -> Unit, execute: (String) -> Unit, textColor: Color) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.inverseOnSurface
+            )
+            .defaultMinSize(minHeight = 54.dp)
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = deeplink,
+            style = MaterialTheme.typography.titleMedium.copy(color = textColor),
+            modifier = Modifier.weight(weight = 1f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Icon(
+            imageVector = Icons.Filled.PlayArrow,
+            contentDescription = "TEST",
+            modifier = Modifier
+                .width(28.dp)
+                .height(28.dp)
+                .clickable {
+                    execute.invoke(deeplink)
+                },
+            tint = Color("#8BC34A".toColorInt()),
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Icon(
+            imageVector = Icons.Outlined.Share,
+            contentDescription = "SHARE",
+            modifier = Modifier
+                .width(24.dp)
+                .height(24.dp)
+                .clickable {
+                    shareLink.invoke(deeplink)
+                },
+            tint = Color("#2196F3".toColorInt()),
+        )
+    }
+
+}
+
+@Preview
+@Composable
+fun PreviewItem() {
+    DeeplinkTesterTheme {
+        Item(deeplink = "Sample Deep Link", shareLink = {}, execute = {}, Color.DarkGray)
+    }
+}
+
+@Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewItemNight() {
+    DeeplinkTesterTheme {
+        Item(deeplink = "Sample Deep Link", shareLink = {}, execute = {}, Color.Gray)
     }
 }
 
@@ -301,13 +341,11 @@ fun MainScreenPreview() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
-
-            ) {
+            ) { padding ->
             MainScreen(
                 viewModel = MainViewModel(),
                 modifier = Modifier
-                    .padding(it)
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .padding(padding)
                     .fillMaxWidth(),
                 shareLink = {},
                 clearHistory = {}
