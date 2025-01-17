@@ -29,11 +29,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -106,7 +107,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
         checkDarkMode()
     }
 
@@ -222,13 +222,9 @@ fun MainScreen(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-            Text(
-                text = "Clear All",
-                style = MaterialTheme.typography.bodyLarge.copy(color = Color.Blue),
-                modifier = Modifier.clickable {
-                    clearHistory.invoke()
-                }
-            )
+            IconButton(onClick = clearHistory) {
+                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Clear History", tint = MaterialTheme.colorScheme.primary)
+            }
         }
 
         if (list.isEmpty()) {
@@ -242,18 +238,28 @@ fun MainScreen(
             )
         }
 
-        val textColor = if(isDarkMode) Color.Gray else Color.DarkGray
+        val textColor = if (isDarkMode) Color.Gray else Color.DarkGray
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(list.size) {
-                Item(deeplink = list[it], shareLink = shareLink, execute = deeplink, textColor = textColor)
+                Item(
+                    deeplink = list[it],
+                    shareLink = shareLink,
+                    execute = deeplink,
+                    textColor = textColor
+                )
             }
         }
     }
 }
 
 @Composable
-fun Item(deeplink: String, shareLink: (String) -> Unit, execute: (String) -> Unit, textColor: Color) {
+fun Item(
+    deeplink: String,
+    shareLink: (String) -> Unit,
+    execute: (String) -> Unit,
+    textColor: Color
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -327,7 +333,6 @@ fun PreviewItemNight() {
 @Composable
 fun MainScreenPreview() {
     DeeplinkTesterTheme {
-
         Scaffold(
             topBar = {
                 Row(
@@ -341,7 +346,7 @@ fun MainScreenPreview() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
-            ) { padding ->
+        ) { padding ->
             MainScreen(
                 viewModel = MainViewModel(),
                 modifier = Modifier

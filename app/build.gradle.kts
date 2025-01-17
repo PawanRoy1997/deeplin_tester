@@ -3,9 +3,6 @@ import config.AppConfig
 
 plugins {
     id("android-application")
-//    id("kotlin-android")
-//    alias(libs.plugins.kotlin)
-//    alias(libs.plugins.kspPlugin)
 }
 
 android {
@@ -36,7 +33,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
