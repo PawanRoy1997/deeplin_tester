@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_UNDEFINED
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -27,10 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -52,12 +47,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 import com.nextxform.deeplinktester.ui.theme.DeeplinkTesterTheme
 import com.nextxform.deeplinktester.utils.db.DeepLinkEntity
 import com.nextxform.deeplinktester.viewModels.MainViewModel
+import com.nextxform.deeplinktester.viewModels.PreviewMainViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -112,7 +110,7 @@ class MainActivity : ComponentActivity() {
 
 
     private fun checkDarkMode() {
-        val uiModeManager = this.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+        val uiModeManager = this.getSystemService(UI_MODE_SERVICE) as UiModeManager
         isDarkMode = uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES
     }
 
@@ -156,11 +154,11 @@ fun MainScreen(
             try {
                 val intent = Intent().apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse(url)
+                    data = url.toUri()
                 }
                 context.startActivity(intent)
                 viewModel.addNewEntry(url, System.currentTimeMillis())
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 error = "Something went wrong!\nPlease check your deep link again"
                 Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
                 viewModel.removeEntry(url)
@@ -223,7 +221,7 @@ fun MainScreen(
             )
 
             IconButton(onClick = clearHistory) {
-                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Clear History", tint = MaterialTheme.colorScheme.primary)
+                Icon(painter = painterResource(R.drawable.delete), contentDescription = "Clear History", tint = MaterialTheme.colorScheme.primary)
             }
         }
 
@@ -278,7 +276,7 @@ fun Item(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Icon(
-            imageVector = Icons.Filled.PlayArrow,
+            painter = painterResource(R.drawable.play),
             contentDescription = "TEST",
             modifier = Modifier
                 .width(28.dp)
@@ -292,7 +290,7 @@ fun Item(
         Spacer(modifier = Modifier.width(8.dp))
 
         Icon(
-            imageVector = Icons.Outlined.Share,
+            painter = painterResource(R.drawable.share),
             contentDescription = "SHARE",
             modifier = Modifier
                 .width(24.dp)
@@ -331,7 +329,7 @@ fun PreviewItemNight() {
 )
 @Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES, showBackground = true, showSystemUi = true)
 @Composable
-fun MainScreenPreview() {
+fun MainScreenPreview(@PreviewParameter(PreviewMainViewModel::class) viewModel: MainViewModel) {
     DeeplinkTesterTheme {
         Scaffold(
             topBar = {
@@ -348,7 +346,7 @@ fun MainScreenPreview() {
                 .background(MaterialTheme.colorScheme.background),
         ) { padding ->
             MainScreen(
-                viewModel = MainViewModel(),
+                viewModel = viewModel,
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxWidth(),

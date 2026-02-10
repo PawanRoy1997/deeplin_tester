@@ -2,6 +2,7 @@ package com.nextxform.deeplinktester.viewModels
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nextxform.deeplinktester.utils.db.DeepLinkDao
@@ -42,4 +43,8 @@ class MainViewModel : ViewModel() {
             _deepLinkLiveData.value = deepLinkDao.getAllDeepLinks()
         }
     }
+}
+
+class PreviewMainViewModel(): PreviewParameterProvider<MainViewModel>{
+    override val values: Sequence<MainViewModel> = sequenceOf(MainViewModel())
 }

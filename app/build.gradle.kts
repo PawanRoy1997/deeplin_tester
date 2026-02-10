@@ -1,22 +1,24 @@
-import config.Deps
+import com.android.build.api.dsl.ApplicationExtension
 import config.AppConfig
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("android-application")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
-android {
-    namespace = AppConfig.namespace
-    compileSdk = AppConfig.compileSdk
+extensions.configure<ApplicationExtension>("android") {
+    namespace = AppConfig.NAMESPACE
+    compileSdk = AppConfig.COMPILE_SDK
 
     defaultConfig {
-        applicationId = AppConfig.applicationId
-        minSdk = AppConfig.minSdk
-        targetSdk = AppConfig.targetSdk
-        versionCode = AppConfig.versionCode
-        versionName = AppConfig.versionName
+        applicationId = AppConfig.APPLICATION_ID
+        minSdk = AppConfig.MIN_SDK
+        targetSdk = AppConfig.TARGET_SDK
+        versionCode = AppConfig.VERSION_CODE
+        versionName = AppConfig.VERSION_NAME
 
-        testInstrumentationRunner = AppConfig.testInstrumentationRunner
+        testInstrumentationRunner = AppConfig.TEST_INSTRUMENTATION_RUNNER
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -42,17 +44,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = AppConfig.sourceCompatibility
-        targetCompatibility = AppConfig.sourceCompatibility
-    }
-    kotlinOptions {
-        jvmTarget = AppConfig.sourceTarget
+        sourceCompatibility = AppConfig.SOURCE_COMPATIBILITY
+        targetCompatibility = AppConfig.SOURCE_COMPATIBILITY
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
     }
     packaging {
         resources {
@@ -61,20 +57,40 @@ android {
     }
 }
 
+kotlin.compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+
 dependencies {
+//    Core
+    implementation("androidx.core:core:1.17.0")
+    implementation("androidx.activity:activity-compose:1.12.3")
 
-    implementation(platform(Deps.Compose.composeBom))
-    androidTestImplementation(platform(Deps.Compose.composeBom))
+//    Compose
+    implementation(platform("androidx.compose:compose-bom:2026.01.01"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
 
-    Deps.Core.list.forEach(::implementation)
+//    Room
+    implementation("androidx.room:room-ktx:2.8.4")
+    ksp("androidx.room:room-compiler:2.8.4")
 
-    Deps.Compose.list.forEach(::implementation)
-    implementation(Deps.Room.room)
-    ksp(Deps.Room.room_ksp)
+//    Lifecycle
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
 
-    Deps.LifeCycle.list.forEach(::implementation)
+//    Unit Testing
+    testImplementation("junit:junit:4.13.2")
 
-    Deps.Testing.unitTest.forEach(::testImplementation)
-    Deps.Testing.androidTest.forEach(::androidTestImplementation)
-    Deps.Debug.list.forEach(::debugImplementation)
+//    Instrumentation Testing
+    androidTestImplementation(platform("androidx.compose:compose-bom:2026.01.01"))
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+
+//    Debug
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
