@@ -11,29 +11,38 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,60 +54,54 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import com.nextxform.deeplinktester.ui.theme.DeeplinkTesterTheme
 import com.nextxform.deeplinktester.utils.db.DeepLinkEntity
 import com.nextxform.deeplinktester.viewModels.MainViewModel
-import com.nextxform.deeplinktester.viewModels.PreviewMainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
+    val viewModel: MainViewModel by viewModels()
     private var isDarkMode by mutableStateOf(false)
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             DeeplinkTesterTheme {
-                // A surface container using the 'background' color from the theme
+                val list = viewModel.deepLinkLiveData.value.map(DeepLinkEntity::url).toList()
                 Scaffold(
+                    contentWindowInsets = WindowInsets.safeContent,
+
                     topBar = {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
+                        TopAppBar(title = {
                             Text(
                                 text = "Deep Link Tester",
-                                style = MaterialTheme.typography.headlineMedium
+                                style = MaterialTheme.typography.titleLarge
                             )
                         }
+                        )
                     },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background),
-
-                    ) {
-                    val viewModel: MainViewModel by viewModels()
-
-                    viewModel.getHistory()
+                ) { innerPadding ->
                     MainScreen(
-                        viewModel = viewModel,
+                        list = list,
                         shareLink = { link -> shareLink(link) },
                         copyLink = { link -> copyLink(link) },
                         modifier = Modifier
-                            .padding(it)
+                            .padding(innerPadding)
                             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                             .fillMaxWidth(),
                         clearHistory = {
                             viewModel.clearHistory()
+                        },
+                        log = { url, time ->
+                            viewModel.addNewEntry(url, time)
                         },
                         isDarkMode = isDarkMode
                     )
@@ -108,6 +111,10 @@ class MainActivity : ComponentActivity() {
         checkDarkMode()
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.getHistory()
+    }
 
     private fun checkDarkMode() {
         val uiModeManager = this.getSystemService(UI_MODE_SERVICE) as UiModeManager
@@ -133,15 +140,15 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel,
+    list: List<String>,
     shareLink: (String) -> Unit,
     copyLink: (String) -> Unit = {},
     modifier: Modifier,
     clearHistory: () -> Unit,
+    log: (String, Long) -> Unit,
     isDarkMode: Boolean = false
 ) {
 
-    val list = viewModel.deepLinkLiveData.value.map(DeepLinkEntity::url).toList()
     val context: Context = LocalContext.current
 
     Column(
@@ -157,57 +164,94 @@ fun MainScreen(
                     data = url.toUri()
                 }
                 context.startActivity(intent)
-                viewModel.addNewEntry(url, System.currentTimeMillis())
+                log(url, System.currentTimeMillis())
             } catch (_: Exception) {
                 error = "Something went wrong!\nPlease check your deep link again"
                 Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-                viewModel.removeEntry(url)
             }
         }
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            label = { Text("Deep Link") },
-            modifier = Modifier.fillMaxWidth(),
-            trailingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.copy),
-                    contentDescription = "Copy",
-                    modifier = Modifier.clickable {
-                        copyLink.invoke(text)
-                    }
+
+        Spacer(Modifier.height(5.dp))
+        Card(
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp, focusedElevation = 6.dp)
+        ) {
+            Column(Modifier.padding(10.dp)) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text("Enter Deep Link") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+//                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = Color.Gray
+                    ),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.link),
+                            contentDescription = "Copy",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.clickable {
+                                copyLink.invoke(text)
+                            }
+                        )
+                    },
+                    supportingText = {
+                        Text(error)
+                    },
+                    isError = error.isNotEmpty(),
+                    singleLine = true
                 )
-            },
-            supportingText = {
-                Text(error)
-            },
-            isError = error.isNotEmpty(),
-            singleLine = true
-        )
 
-        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
-            onClick = {
-                if (text.trim().isEmpty()) {
-                    error = "Deep Link is Empty"
-                    return@Button
+                Row(Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = {
+                            if (text.trim().isEmpty()) {
+                                error = "Deep Link is Empty"
+                                return@Button
+                            }
+                            error = ""
+                            deeplink.invoke(text)
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(
+                            text = "Fire Deep Link",
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                    }
+
+                    Spacer(Modifier.width(20.dp))
+
+                    OutlinedButton(
+                        onClick = {
+                            if (text.trim().isEmpty()) {
+                                error = "Deep Link is Empty"
+                                return@OutlinedButton
+                            }
+                            error = ""
+                            deeplink.invoke(text)
+                        },
+                        modifier = Modifier.weight(1f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                    ) {
+                        Text(
+                            text = "Add to Favourite",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
-                error = ""
-                deeplink.invoke(text)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
 
-            ) {
-            Text(
-                text = "TEST",
-                style = MaterialTheme.typography.labelSmall,
-                fontSize = 20.sp,
-                textDecoration = TextDecoration.None,
-            )
+            }
         }
 
+        Spacer(Modifier.height(20.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -216,13 +260,11 @@ fun MainScreen(
 
             Text(
                 text = "History",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-            IconButton(onClick = clearHistory) {
-                Icon(painter = painterResource(R.drawable.delete), contentDescription = "Clear History", tint = MaterialTheme.colorScheme.primary)
-            }
+            Text("Clear All", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
         }
 
         if (list.isEmpty()) {
@@ -230,9 +272,10 @@ fun MainScreen(
                 text = "No History",
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable { clearHistory.invoke() }
                     .padding(vertical = 20.dp),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
@@ -327,31 +370,33 @@ fun PreviewItemNight() {
     uiMode = UI_MODE_NIGHT_UNDEFINED,
     showBackground = true
 )
+
 @Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES, showBackground = true, showSystemUi = true)
 @Composable
-fun MainScreenPreview(@PreviewParameter(PreviewMainViewModel::class) viewModel: MainViewModel) {
+fun MainScreenPreview() {
     DeeplinkTesterTheme {
         Scaffold(
+            contentWindowInsets = WindowInsets.safeContent,
             topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(text = "Deep Link Tester", style = MaterialTheme.typography.headlineMedium)
-                }
+                TopAppBar(
+                    title = {
+                        Text(text = "Deep Link Tester", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                    },
+                )
             },
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
         ) { padding ->
             MainScreen(
-                viewModel = viewModel,
+                listOf(),
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxWidth(),
                 shareLink = {},
-                clearHistory = {}
+                clearHistory = {},
+                log = { _, _ -> },
+                isDarkMode = false
             )
         }
     }
