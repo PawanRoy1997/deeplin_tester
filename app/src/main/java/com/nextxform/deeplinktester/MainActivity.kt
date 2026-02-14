@@ -27,20 +27,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -78,31 +82,56 @@ class MainActivity : ComponentActivity() {
                 val list = viewModel.deepLinkLiveData.value.map(DeepLinkEntity::url).toList()
                 Scaffold(
                     contentWindowInsets = WindowInsets.safeContent,
-
                     topBar = {
-                        TopAppBar(title = {
-                            Text(
-                                text = "Deep Link Tester",
-                                style = MaterialTheme.typography.titleLarge
+                        Surface(shadowElevation = 4.dp) {
+                            TopAppBar(
+                                title = {
+                                    Text(
+                                        text = "Deep Link Tester",
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+                                },
                             )
                         }
-                        )
                     },
+                    bottomBar = {
+                        BottomAppBar(
+                            actions = {
+                                IconButton(onClick = { /* do something */ }) {
+                                    Icon(painter = painterResource(R.drawable.favourite), contentDescription = "Localized description")
+                                }
+//                                IconButton(onClick = { /* do something */ }) {
+//                                    Icon(
+//                                        Icons.Filled.Edit,
+//                                        contentDescription = "Localized description",
+//                                    )
+//                                }
+//                                IconButton(onClick = { /* do something */ }) {
+//                                    Icon(
+//                                        Icons.Filled.Mic,
+//                                        contentDescription = "Localized description",
+//                                    )
+//                                }
+//                                IconButton(onClick = { /* do something */ }) {
+//                                    Icon(
+//                                        Icons.Filled.Image,
+//                                        contentDescription = "Localized description",
+//                                    )
+//                                }
+                            }
+                        )
+                    }
                 ) { innerPadding ->
                     MainScreen(
-                        list = list,
-                        shareLink = { link -> shareLink(link) },
-                        copyLink = { link -> copyLink(link) },
                         modifier = Modifier
                             .padding(innerPadding)
                             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                             .fillMaxWidth(),
-                        clearHistory = {
-                            viewModel.clearHistory()
-                        },
-                        log = { url, time ->
-                            viewModel.addNewEntry(url, time)
-                        },
+                        list = list,
+                        shareLink = { link -> shareLink(link) },
+                        copyLink = { link -> copyLink(link) },
+                        clearHistory = { viewModel.clearHistory() },
+                        log = { url, time -> viewModel.addNewEntry(url, time) },
                         isDarkMode = isDarkMode
                     )
                 }
@@ -171,7 +200,8 @@ fun MainScreen(
             }
         }
 
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(10.dp))
+
         Card(
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp, focusedElevation = 6.dp)
         ) {
@@ -182,17 +212,18 @@ fun MainScreen(
                     label = { Text("Enter Deep Link") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-//                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = Color.Gray
                     ),
                     leadingIcon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.link),
+                            painter = painterResource(id = R.drawable.qr_code),
                             contentDescription = "Copy",
                             tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.clickable {
-                                copyLink.invoke(text)
-                            }
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clickable {
+                                    copyLink.invoke(text)
+                                }
                         )
                     },
                     supportingText = {
@@ -376,17 +407,29 @@ fun PreviewItemNight() {
 fun MainScreenPreview() {
     DeeplinkTesterTheme {
         Scaffold(
+            Modifier.fillMaxSize(),
             contentWindowInsets = WindowInsets.safeContent,
             topBar = {
-                TopAppBar(
-                    title = {
-                        Text(text = "Deep Link Tester", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-                    },
-                )
+                Surface(shadowElevation = 4.dp) {
+                    TopAppBar(
+                        title = {
+                            Text(text = "Deep Link Tester", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                        },
+                    )
+                }
             },
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+            bottomBar = {
+                BottomAppBar(
+                    actions = {
+                        IconButton(onClick = { /* do something */ }) {
+                            Icon(painter = painterResource(R.drawable.favourite), contentDescription = "Localized description")
+                        }
+                        IconButton(onClick = { /* do something */ }) {
+                            Icon(painterResource(R.drawable.outline_avg_time_24), contentDescription = "Localized description")
+                        }
+                    }
+                )
+            }
         ) { padding ->
             MainScreen(
                 listOf(),
