@@ -91,6 +91,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:${lifecycleVersion}")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:${lifecycleVersion}")
 
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
 //    Unit Testing
     val mockkVersion = "1.14.9"

@@ -1,17 +1,18 @@
 package com.nextxform.deeplinktester
 
+import android.Manifest.permission.CAMERA
 import android.app.UiModeManager
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
+import android.content.Intent.EXTRA_TEXT
 import android.content.res.Configuration.UI_MODE_NIGHT_UNDEFINED
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -62,6 +63,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.journeyapps.barcodescanner.CaptureActivity
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanIntentResult
+import com.journeyapps.barcodescanner.ScanOptions
 import com.nextxform.deeplinktester.ui.theme.DeeplinkTesterTheme
 import com.nextxform.deeplinktester.utils.db.DeepLinkEntity
 import com.nextxform.deeplinktester.viewModels.MainViewModel
@@ -140,7 +145,6 @@ class MainActivity : ComponentActivity() {
                             .fillMaxWidth(),
                         list = list,
                         shareLink = { link -> shareLink(link) },
-                        copyLink = { link -> copyLink(link) },
                         clearHistory = { viewModel.clearHistory() },
                         log = { url, time -> viewModel.addNewEntry(url, time) },
                         isDarkMode = isDarkMode
@@ -164,17 +168,12 @@ class MainActivity : ComponentActivity() {
     private fun shareLink(link: String) {
         val intent = Intent().apply {
             this.type = "text/plain"
-            this.putExtra(Intent.EXTRA_TEXT, link)
+            this.putExtra(EXTRA_TEXT, link)
         }
         val chooser = Intent.createChooser(intent, "Share link via")
         startActivity(chooser)
     }
 
-    private fun copyLink(link: String) {
-        val clipboardManager = this.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-        val clipData = ClipData.newPlainText("deeplink", link)
-        clipboardManager.setPrimaryClip(clipData)
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -182,21 +181,20 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(
     list: List<String>,
     shareLink: (String) -> Unit,
-    copyLink: (String) -> Unit = {},
     modifier: Modifier,
     clearHistory: () -> Unit,
     log: (String, Long) -> Unit,
     isDarkMode: Boolean = false
 ) {
 
-    val context: Context = LocalContext.current
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
+        val context = LocalContext.current
         var text by remember { mutableStateOf("") }
         var error by remember { mutableStateOf("") }
+        var hasCameraPermission by remember { mutableStateOf(false) }
         val deeplink = { url: String ->
             try {
                 val intent = Intent().apply {
@@ -209,6 +207,40 @@ fun MainScreen(
                 error = "Something went wrong!\nPlease check your deep link again"
                 Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
             }
+        }
+
+        val qrScanner = rememberLauncherForActivityResult(ScanContract()) { result: ScanIntentResult? ->
+            if (result == null || result.originalIntent == null) {
+                Toast.makeText(context, "Scan Cancelled", Toast.LENGTH_SHORT).show()
+                return@rememberLauncherForActivityResult
+            }
+
+            if (result.originalIntent.getBooleanExtra("CANCELLED", false)) {
+                Toast.makeText(context, "Scan Cancelled", Toast.LENGTH_SHORT).show()
+                return@rememberLauncherForActivityResult
+            }
+
+            text = result.contents
+        }
+
+        val cameraPermissionLauncher = rememberLauncherForActivityResult(RequestPermission()) { result: Boolean? ->
+            hasCameraPermission = (result == true)
+        }
+
+        fun scanQRCode() {
+            if (!hasCameraPermission) {
+                cameraPermissionLauncher.launch(CAMERA); return
+            }
+            val scanOption = ScanOptions().apply {
+                setCaptureActivity(CaptureActivity::class.java)
+                setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                setPrompt("Scan QR Code")
+                setBeepEnabled(true)
+                setOrientationLocked(true)
+                setTorchEnabled(true)
+                setCameraId(0)
+            }
+            qrScanner.launch(scanOption)
         }
 
         Spacer(Modifier.height(10.dp))
@@ -232,9 +264,7 @@ fun MainScreen(
                             tint = Color(0xFF673AB7),
                             modifier = Modifier
                                 .size(30.dp)
-                                .clickable {
-                                    copyLink.invoke(text)
-                                }
+                                .clickable { scanQRCode() }
                         )
                     },
                     supportingText = {
@@ -343,6 +373,7 @@ fun Item(
     execute: (String) -> Unit,
     textColor: Color
 ) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -369,7 +400,9 @@ fun Item(
                 .width(28.dp)
                 .height(28.dp)
                 .clickable {
-                    execute.invoke(deeplink)
+                    val intent = Intent(context, GenerateQRActivity::class.java)
+                    intent.putExtra("url", deeplink)
+                    context.startActivity(intent)
                 },
             tint = Color(0xFF673AB7),
         )
@@ -457,7 +490,11 @@ fun MainScreenPreview() {
                     },
                     floatingActionButton = {
                         FloatingActionButton(onClick = { /* do something */ }, containerColor = MaterialTheme.colorScheme.primary) {
-                            Icon(painter = painterResource(R.drawable.outline_add_2_24), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
+                            Icon(
+                                painter = painterResource(R.drawable.outline_add_2_24),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                     }
                 )
