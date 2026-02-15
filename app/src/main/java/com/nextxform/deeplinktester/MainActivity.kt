@@ -60,7 +60,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import com.nextxform.deeplinktester.ui.theme.DeeplinkTesterTheme
 import com.nextxform.deeplinktester.utils.db.DeepLinkEntity
@@ -218,7 +217,7 @@ fun MainScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.qr_code),
                             contentDescription = "Copy",
-                            tint = MaterialTheme.colorScheme.secondary,
+                            tint = Color(0xFF673AB7),
                             modifier = Modifier
                                 .size(30.dp)
                                 .clickable {
@@ -348,7 +347,23 @@ fun Item(
             style = MaterialTheme.typography.titleMedium.copy(color = textColor),
             modifier = Modifier.weight(weight = 1f)
         )
+
         Spacer(modifier = Modifier.width(8.dp))
+
+        Icon(
+            painter = painterResource(R.drawable.qr_code),
+            contentDescription = "TEST",
+            modifier = Modifier
+                .width(28.dp)
+                .height(28.dp)
+                .clickable {
+                    execute.invoke(deeplink)
+                },
+            tint = Color(0xFF673AB7),
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
         Icon(
             painter = painterResource(R.drawable.play),
             contentDescription = "TEST",
@@ -358,7 +373,7 @@ fun Item(
                 .clickable {
                     execute.invoke(deeplink)
                 },
-            tint = Color("#8BC34A".toColorInt()),
+            tint = Color(0xFF8BC34A),
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -372,7 +387,7 @@ fun Item(
                 .clickable {
                     shareLink.invoke(deeplink)
                 },
-            tint = Color("#2196F3".toColorInt()),
+            tint = Color(0xFF2196F3),
         )
     }
 
@@ -422,10 +437,10 @@ fun MainScreenPreview() {
                 BottomAppBar(
                     actions = {
                         IconButton(onClick = { /* do something */ }) {
-                            Icon(painter = painterResource(R.drawable.favourite), contentDescription = "Localized description")
+                            Icon(painter = painterResource(R.drawable.favourite), contentDescription = "Localized description", Modifier.size(30.dp))
                         }
                         IconButton(onClick = { /* do something */ }) {
-                            Icon(painterResource(R.drawable.outline_avg_time_24), contentDescription = "Localized description")
+                            Icon(painterResource(R.drawable.outline_avg_time_24), contentDescription = "Localized description", Modifier.size(30.dp))
                         }
                     }
                 )
