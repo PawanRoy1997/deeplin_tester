@@ -3,4 +3,5 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_favourite_links">FavouriteLinksActivity</string>
     <string name="title_activity_history">HistoryActivity</string>
+    <string name="title_activity_link_builder">LinkBuilderActivity</string>
 </resources>

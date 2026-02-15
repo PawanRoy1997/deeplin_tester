@@ -37,6 +37,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -96,27 +97,38 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         BottomAppBar(
                             actions = {
-                                IconButton(onClick = { /* do something */ }) {
-                                    Icon(painter = painterResource(R.drawable.favourite), contentDescription = "Localized description")
+                                IconButton(onClick = {
+                                    val intent = Intent(this@MainActivity, FavouriteLinksActivity::class.java)
+                                    startActivity(intent)
+                                }) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.favourite),
+                                        contentDescription = "Localized description",
+                                        Modifier.size(24.dp)
+                                    )
                                 }
-//                                IconButton(onClick = { /* do something */ }) {
-//                                    Icon(
-//                                        Icons.Filled.Edit,
-//                                        contentDescription = "Localized description",
-//                                    )
-//                                }
-//                                IconButton(onClick = { /* do something */ }) {
-//                                    Icon(
-//                                        Icons.Filled.Mic,
-//                                        contentDescription = "Localized description",
-//                                    )
-//                                }
-//                                IconButton(onClick = { /* do something */ }) {
-//                                    Icon(
-//                                        Icons.Filled.Image,
-//                                        contentDescription = "Localized description",
-//                                    )
-//                                }
+                                IconButton(onClick = {
+                                    val intent = Intent(this@MainActivity, HistoryActivity::class.java)
+                                    startActivity(intent)
+                                }) {
+                                    Icon(
+                                        painterResource(R.drawable.outline_avg_time_24),
+                                        contentDescription = "Localized description",
+                                        Modifier.size(24.dp)
+                                    )
+                                }
+                            },
+                            floatingActionButton = {
+                                FloatingActionButton(onClick = {
+                                    val intent = Intent(this@MainActivity, LinkBuilderActivity::class.java)
+                                    startActivity(intent)
+                                }, containerColor = MaterialTheme.colorScheme.primary) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.outline_add_2_24),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
                             }
                         )
                     }
@@ -437,10 +449,15 @@ fun MainScreenPreview() {
                 BottomAppBar(
                     actions = {
                         IconButton(onClick = { /* do something */ }) {
-                            Icon(painter = painterResource(R.drawable.favourite), contentDescription = "Localized description", Modifier.size(30.dp))
+                            Icon(painter = painterResource(R.drawable.favourite), contentDescription = "Localized description", Modifier.size(20.dp))
                         }
                         IconButton(onClick = { /* do something */ }) {
-                            Icon(painterResource(R.drawable.outline_avg_time_24), contentDescription = "Localized description", Modifier.size(30.dp))
+                            Icon(painterResource(R.drawable.outline_avg_time_24), contentDescription = "Localized description", Modifier.size(20.dp))
+                        }
+                    },
+                    floatingActionButton = {
+                        FloatingActionButton(onClick = { /* do something */ }, containerColor = MaterialTheme.colorScheme.primary) {
+                            Icon(painter = painterResource(R.drawable.outline_add_2_24), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                 )
