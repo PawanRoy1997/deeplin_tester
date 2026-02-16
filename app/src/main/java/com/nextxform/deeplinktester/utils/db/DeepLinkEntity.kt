@@ -11,5 +11,9 @@ data class DeepLinkEntity(
     @ColumnInfo(name = "url")
     val url: String,
     @ColumnInfo("last_used")
-    val lastUsed: Long
+    val lastUsed: Long,
+    @ColumnInfo("is_favourite")
+    val isFavourite: Boolean
 )
+
+data class DeepLinkItem(val id: Int, val url: String, val lastUsed: String, val isFavourite: Boolean)

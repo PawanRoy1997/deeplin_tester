@@ -4,6 +4,7 @@ import android.Manifest.permission.CAMERA
 import android.app.UiModeManager
 import android.content.Intent
 import android.content.Intent.EXTRA_TEXT
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_UNDEFINED
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
@@ -27,7 +28,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,6 +51,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +70,7 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
 import com.nextxform.deeplinktester.ui.theme.DeeplinkTesterTheme
-import com.nextxform.deeplinktester.utils.db.DeepLinkEntity
+import com.nextxform.deeplinktester.utils.db.DeepLinkItem
 import com.nextxform.deeplinktester.viewModels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -84,9 +86,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DeeplinkTesterTheme {
-                val list = viewModel.deepLinkLiveData.value.map(DeepLinkEntity::url).toList()
+                val list by viewModel.deepLinkStateFlow.collectAsState()
                 Scaffold(
-                    contentWindowInsets = WindowInsets.safeContent,
+                    contentWindowInsets = WindowInsets.safeDrawing,
                     topBar = {
                         Surface(shadowElevation = 4.dp) {
                             TopAppBar(
@@ -179,7 +181,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    list: List<String>,
+    list: List<DeepLinkItem>,
     shareLink: (String) -> Unit,
     modifier: Modifier,
     clearHistory: () -> Unit,
@@ -325,7 +327,8 @@ fun MainScreen(
 
         Spacer(Modifier.height(20.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -368,13 +371,13 @@ fun MainScreen(
 
 @Composable
 fun Item(
-    deeplink: String,
+    deeplink: DeepLinkItem,
     shareLink: (String) -> Unit,
     execute: (String) -> Unit,
     textColor: Color
 ) {
     val context = LocalContext.current
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
@@ -383,74 +386,89 @@ fun Item(
             )
             .defaultMinSize(minHeight = 54.dp)
             .padding(vertical = 8.dp, horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = deeplink,
-            style = MaterialTheme.typography.titleMedium.copy(color = textColor),
-            modifier = Modifier.weight(weight = 1f)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = deeplink.url,
+                style = MaterialTheme.typography.titleMedium.copy(color = textColor),
+                modifier = Modifier.weight(weight = 1f),
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
-        Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-        Icon(
-            painter = painterResource(R.drawable.qr_code),
-            contentDescription = "TEST",
-            modifier = Modifier
-                .width(28.dp)
-                .height(28.dp)
-                .clickable {
-                    val intent = Intent(context, GenerateQRActivity::class.java)
-                    intent.putExtra("url", deeplink)
-                    context.startActivity(intent)
-                },
-            tint = Color(0xFF673AB7),
-        )
+            Icon(
+                painter = painterResource(R.drawable.qr_code),
+                contentDescription = "TEST",
+                modifier = Modifier
+                    .width(28.dp)
+                    .height(28.dp)
+                    .clickable {
+                        val intent = Intent(context, GenerateQRActivity::class.java)
+                        intent.putExtra("url", deeplink.url)
+                        context.startActivity(intent)
+                    },
+                tint = Color(0xFF673AB7),
+            )
 
-        Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-        Icon(
-            painter = painterResource(R.drawable.play),
-            contentDescription = "TEST",
-            modifier = Modifier
-                .width(28.dp)
-                .height(28.dp)
-                .clickable {
-                    execute.invoke(deeplink)
-                },
-            tint = Color(0xFF8BC34A),
-        )
+            Icon(
+                painter = painterResource(R.drawable.play),
+                contentDescription = "TEST",
+                modifier = Modifier
+                    .width(28.dp)
+                    .height(28.dp)
+                    .clickable {
+                        execute.invoke(deeplink.url)
+                    },
+                tint = Color(0xFF8BC34A),
+            )
 
-        Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-        Icon(
-            painter = painterResource(R.drawable.share),
-            contentDescription = "SHARE",
-            modifier = Modifier
-                .width(24.dp)
-                .height(24.dp)
-                .clickable {
-                    shareLink.invoke(deeplink)
-                },
-            tint = Color(0xFF2196F3),
-        )
+            Icon(
+                painter = painterResource(R.drawable.share),
+                contentDescription = "SHARE",
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp)
+                    .clickable {
+                        shareLink.invoke(deeplink.url)
+                    },
+                tint = Color(0xFF2196F3),
+            )
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        Row {
+            Text(deeplink.lastUsed, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+            Spacer(Modifier.weight(1f))
+            if (deeplink.isFavourite) Text(
+                "Favourite",
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.White,
+                modifier = Modifier
+                    .background(Color(0xFFFFC107), shape = RoundedCornerShape(10.dp))
+                    .padding(horizontal = 10.dp, vertical = 2.dp)
+            )
+        }
     }
-
 }
 
-@Preview
 @Composable
+@Preview("Light Mode", uiMode = UI_MODE_NIGHT_NO)
+@Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES)
 fun PreviewItem() {
     DeeplinkTesterTheme {
-        Item(deeplink = "Sample Deep Link", shareLink = {}, execute = {}, Color.DarkGray)
-    }
-}
-
-@Preview(name = "Dark Mode", uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun PreviewItemNight() {
-    DeeplinkTesterTheme {
-        Item(deeplink = "Sample Deep Link", shareLink = {}, execute = {}, Color.Gray)
+        Column {
+            Item(deeplink = DeepLinkItem(0, "Sample Deep Link", "10/02/2025 10:00 AM", false), shareLink = {}, execute = {}, Color.DarkGray)
+            Spacer(Modifier.height(10.dp))
+            Item(deeplink = DeepLinkItem(0, "Sample Deep Link", "10/02/2025 10:00 AM", true), shareLink = {}, execute = {}, Color.DarkGray)
+        }
     }
 }
 
@@ -468,7 +486,7 @@ fun MainScreenPreview() {
     DeeplinkTesterTheme {
         Scaffold(
             Modifier.fillMaxSize(),
-            contentWindowInsets = WindowInsets.safeContent,
+            contentWindowInsets = WindowInsets.safeDrawing,
             topBar = {
                 Surface(shadowElevation = 4.dp) {
                     TopAppBar(
