@@ -59,6 +59,7 @@ class FavouriteLinksActivity : ComponentActivity() {
             DeeplinkTesterTheme {
                 val links = viewModel.deepLinkMutableState.collectAsState()
                 FavouriteLinksScreen(
+                    "Favourite Links",
                     onBackPress = { onBackPressedDispatcher.onBackPressed() },
                     onSearch = { searchQuery -> viewModel.onSearch(searchQuery) },
                     deepLinks = links.value,
@@ -94,6 +95,7 @@ class FavouriteLinksActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavouriteLinksScreen(
+    title: String,
     onBackPress: () -> Unit,
     onSearch: (String) -> Unit,
     deepLinks: List<DeepLinkItem>,
@@ -107,7 +109,7 @@ fun FavouriteLinksScreen(
             Surface(shadowElevation = 4.dp) {
                 TopAppBar(
                     title = {
-                        Text(text = "Favourite Links", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                        Text(text = title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackPress) {
@@ -184,6 +186,7 @@ fun FavouriteLinksScreen(
 fun FavouriteLinksScreenPreview() {
     DeeplinkTesterTheme {
         FavouriteLinksScreen(
+            "Favourite Links",
             onBackPress = {},
             onSearch = {},
             deepLinks = listOf(),
