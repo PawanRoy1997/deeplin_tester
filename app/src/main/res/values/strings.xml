@@ -5,4 +5,5 @@
     <string name="title_activity_history">HistoryActivity</string>
     <string name="title_activity_link_builder">LinkBuilderActivity</string>
     <string name="title_activity_generate_qractivity">GenerateQRActivity</string>
+    <string name="title_activity_scan_qr">ScanQrActivity</string>
 </resources>

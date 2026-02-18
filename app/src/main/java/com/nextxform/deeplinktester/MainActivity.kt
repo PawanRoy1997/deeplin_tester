@@ -234,7 +234,7 @@ fun MainScreen(
                 cameraPermissionLauncher.launch(CAMERA); return
             }
             val scanOption = ScanOptions().apply {
-                setCaptureActivity(CaptureActivity::class.java)
+                setCaptureActivity(ScanQrActivity::class.java)
                 setDesiredBarcodeFormats(ScanOptions.QR_CODE)
                 setPrompt("Scan QR Code")
                 setBeepEnabled(true)
