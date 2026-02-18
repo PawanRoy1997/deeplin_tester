@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
                         list = list,
                         shareLink = { link -> shareLink(link) },
                         clearHistory = { viewModel.clearHistory() },
-                        log = { url, time -> viewModel.addNewEntry(url, time) },
+                        log = { url, time, favourite -> viewModel.addNewEntry(url, time, favourite) },
                         isDarkMode = isDarkMode
                     )
                 }
@@ -185,7 +185,7 @@ fun MainScreen(
     shareLink: (String) -> Unit,
     modifier: Modifier,
     clearHistory: () -> Unit,
-    log: (String, Long) -> Unit,
+    log: (String, Long, Boolean) -> Unit,
     isDarkMode: Boolean = false
 ) {
 
@@ -197,14 +197,14 @@ fun MainScreen(
         var text by remember { mutableStateOf("") }
         var error by remember { mutableStateOf("") }
         var hasCameraPermission by remember { mutableStateOf(false) }
-        val deeplink = { url: String ->
+        val deeplink = { url: String, favourite: Boolean ->
             try {
                 val intent = Intent().apply {
                     action = Intent.ACTION_VIEW
                     data = url.toUri()
                 }
                 context.startActivity(intent)
-                log(url, System.currentTimeMillis())
+                log(url, System.currentTimeMillis(), favourite)
             } catch (_: Exception) {
                 error = "Something went wrong!\nPlease check your deep link again"
                 Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
@@ -286,7 +286,7 @@ fun MainScreen(
                                 return@Button
                             }
                             error = ""
-                            deeplink.invoke(text)
+                            deeplink.invoke(text, false)
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
@@ -309,7 +309,7 @@ fun MainScreen(
                                 return@OutlinedButton
                             }
                             error = ""
-                            deeplink.invoke(text)
+                            deeplink.invoke(text, true)
                         },
                         modifier = Modifier.weight(1f),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
@@ -373,7 +373,7 @@ fun MainScreen(
 fun Item(
     deeplink: DeepLinkItem,
     shareLink: (String) -> Unit,
-    execute: (String) -> Unit,
+    execute: (String, Boolean) -> Unit,
     textColor: Color
 ) {
     val context = LocalContext.current
@@ -422,7 +422,7 @@ fun Item(
                     .width(28.dp)
                     .height(28.dp)
                     .clickable {
-                        execute.invoke(deeplink.url)
+                        execute.invoke(deeplink.url, deeplink.isFavourite)
                     },
                 tint = Color(0xFF8BC34A),
             )
@@ -465,9 +465,9 @@ fun Item(
 fun PreviewItem() {
     DeeplinkTesterTheme {
         Column {
-            Item(deeplink = DeepLinkItem(0, "Sample Deep Link", "10/02/2025 10:00 AM", false), shareLink = {}, execute = {}, Color.DarkGray)
+            Item(deeplink = DeepLinkItem(0, "Sample Deep Link", "10/02/2025 10:00 AM", false), shareLink = {}, execute = { _, _ -> }, Color.DarkGray)
             Spacer(Modifier.height(10.dp))
-            Item(deeplink = DeepLinkItem(0, "Sample Deep Link", "10/02/2025 10:00 AM", true), shareLink = {}, execute = {}, Color.DarkGray)
+            Item(deeplink = DeepLinkItem(0, "Sample Deep Link", "10/02/2025 10:00 AM", true), shareLink = {}, execute = { _, _ -> }, Color.DarkGray)
         }
     }
 }
@@ -525,7 +525,7 @@ fun MainScreenPreview() {
                     .fillMaxWidth(),
                 shareLink = {},
                 clearHistory = {},
-                log = { _, _ -> },
+                log = { _, _, _ -> },
                 isDarkMode = false
             )
         }
