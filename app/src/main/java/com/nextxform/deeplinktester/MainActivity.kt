@@ -65,7 +65,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.journeyapps.barcodescanner.CaptureActivity
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
@@ -125,18 +124,18 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             },
-                            floatingActionButton = {
-                                FloatingActionButton(onClick = {
-                                    val intent = Intent(this@MainActivity, LinkBuilderActivity::class.java)
-                                    startActivity(intent)
-                                }, containerColor = MaterialTheme.colorScheme.primary) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.outline_add_2_24),
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                }
-                            }
+//                            floatingActionButton = {
+//                                FloatingActionButton(onClick = {
+//                                    val intent = Intent(this@MainActivity, LinkBuilderActivity::class.java)
+//                                    startActivity(intent)
+//                                }, containerColor = MaterialTheme.colorScheme.primary) {
+//                                    Icon(
+//                                        painter = painterResource(R.drawable.outline_add_2_24),
+//                                        contentDescription = null,
+//                                        tint = MaterialTheme.colorScheme.onPrimary
+//                                    )
+//                                }
+//                            }
                         )
                     }
                 ) { innerPadding ->

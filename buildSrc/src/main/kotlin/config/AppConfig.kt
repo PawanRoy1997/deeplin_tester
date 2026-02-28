@@ -8,8 +8,8 @@ object AppConfig {
     const val APPLICATION_ID = "com.nextxform.deeplinktester"
     const val MIN_SDK = 23
     const val TARGET_SDK = 36
-    const val VERSION_CODE = 3
-    const val VERSION_NAME = "2.1"
+    const val VERSION_CODE = 4
+    const val VERSION_NAME = "4"
     const val TEST_INSTRUMENTATION_RUNNER = "androidx.test.runner.AndroidJUnitRunner"
     val SOURCE_COMPATIBILITY = JavaVersion.VERSION_17
 }
