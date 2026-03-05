@@ -19,12 +19,25 @@ class SingletonModule {
     @Singleton
     @Provides
     fun getDeepLinkDatabase(@ApplicationContext context: Context): DeepLinkDatabase {
-        return Room.databaseBuilder(context, DeepLinkDatabase::class.java, deepLinkDatabaseName)
-            .fallbackToDestructiveMigration(true).build()
+        return try {
+            Room.databaseBuilder(
+                context,
+                DeepLinkDatabase::class.java,
+                deepLinkDatabaseName
+            ).fallbackToDestructiveMigration(true).build()
+        } catch (e: Exception) {
+            context.deleteDatabase(deepLinkDatabaseName)
+
+            Room.databaseBuilder(
+                context,
+                DeepLinkDatabase::class.java,
+                deepLinkDatabaseName
+            ).fallbackToDestructiveMigration(true).build()
+        }
     }
 
     @Provides
-    fun getDeeplinkDao(database: DeepLinkDatabase): DeepLinkDao{
+    fun getDeeplinkDao(database: DeepLinkDatabase): DeepLinkDao {
         return database.getDeepLinkDao()
     }
 }
