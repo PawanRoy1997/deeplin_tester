@@ -63,8 +63,8 @@ kotlin.compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
 
 dependencies {
 //    Core
-    implementation("androidx.core:core:1.17.0")
-    implementation("androidx.activity:activity-compose:1.12.4")
+    implementation("androidx.core:core:1.19.0")
+    implementation("androidx.activity:activity-compose:1.13.0")
 
 //    Compose
     val composePlatform = platform("androidx.compose:compose-bom:2026.01.01")
@@ -75,17 +75,17 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
 //    Hilt
-    val hiltVersion = "2.59.2"
+    val hiltVersion = "2.60.1"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     ksp("com.google.dagger:hilt-android-compiler:$hiltVersion")
 
 //    Room
-    val roomVersion = "2.8.4"
+    val roomVersion = "2.8.5"
     implementation("androidx.room:room-ktx:${roomVersion}")
     ksp("androidx.room:room-compiler:${roomVersion}")
 
 //    Lifecycle
-    val lifecycleVersion = "2.10.0"
+    val lifecycleVersion = "2.11.0"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${lifecycleVersion}")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:${lifecycleVersion}")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:${lifecycleVersion}")
@@ -94,7 +94,7 @@ dependencies {
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
 //    Unit Testing
-    val mockkVersion = "1.14.9"
+    val mockkVersion = "1.14.11"
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:${mockkVersion}")
 

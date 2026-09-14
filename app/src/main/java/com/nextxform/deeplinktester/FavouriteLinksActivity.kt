@@ -8,26 +8,31 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -107,16 +112,24 @@ fun FavouriteLinksScreen(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
-            Surface(shadowElevation = 4.dp) {
+            Surface(shadowElevation = 2.dp) {
                 TopAppBar(
+                    modifier = Modifier.fillMaxWidth().height(56.dp).background(MaterialTheme.colorScheme.onSurface),
                     title = {
-                        Text(text = title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                        Text(text = title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
                     },
                     navigationIcon = {
-                        IconButton(onClick = onBackPress) {
+                        IconButton(
+                            onClick = onBackPress,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent
+                            )
+                        ) {
                             Icon(
                                 painterResource(R.drawable.outline_arrow_back_24),
                                 contentDescription = null,
+                                modifier = Modifier.size(20.dp),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -128,7 +141,7 @@ fun FavouriteLinksScreen(
         Column(
             Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 10.dp)
+                .padding(all = 10.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -136,8 +149,8 @@ fun FavouriteLinksScreen(
             val textFieldState = rememberTextFieldState()
             val textColor = if (isSystemInDarkTheme()) Color.Gray else Color.DarkGray
             SearchBar(
-                modifier = Modifier
-                    .semantics { traversalIndex = 0f },
+                modifier = Modifier.semantics { traversalIndex = 0f }.height(52.dp).fillMaxWidth(),
+
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = textFieldState.text.toString(),
@@ -151,7 +164,8 @@ fun FavouriteLinksScreen(
                         },
                         expanded = expanded,
                         onExpandedChange = { expanded = it },
-                        placeholder = { Text("Search") }
+                        placeholder = { Text("Search") },
+                        colors = TextFieldDefaults.colors(unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant)
                     )
                 },
                 expanded = expanded,
@@ -192,7 +206,14 @@ fun FavouriteLinksScreenPreview() {
             "Favourite Links",
             onBackPress = {},
             onSearch = {},
-            deepLinks = listOf(),
+            deepLinks = listOf(
+                DeepLinkItem(
+                    id = 1,
+                    url = "https://www.youtube.com/watch?v=2HLF-46Das4",
+                    lastUsed = "Today",
+                    isFavourite = true
+                )
+            ),
             shareLink = {},
             execute = { _, _ -> },
         )

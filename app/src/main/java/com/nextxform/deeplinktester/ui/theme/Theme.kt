@@ -8,35 +8,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF6C63FF),
+    primary = Color(0xFF8B83FF),
     onPrimary = Color.White,
 
-    primaryContainer = Color(0xffE8E6FF),
+    primaryContainer = Color(0xFF292554),
+    onPrimaryContainer = Color(0xFFE8E6FF),
 
-    secondary = Color(0xFF00BFA6),
-    onSecondary = Color.Black,
+    secondary = Color(0xFF6C63FF),
+    onSecondary = Color.White,
 
-    tertiary = Color(0xFF403E8E),
+    tertiary = Color(0xFFB8B3FF),
+    onTertiary = Color(0xFF211E3D),
 
     background = Color(0xFF121212),
-    onBackground = Color(0xFFEDEDED),
+    onBackground = Color(0xFFF2F0F5),
 
-    surface = Color(0xFF1E1E1E),
-    onSurface = Color(0xFFEDEDED),
+    surface = Color(0xFF1C1B1F),
+    onSurface = Color(0xFFF2F0F5),
 
-    outline = Color(0xFF3C3C3C),
+    outline = Color(0xFF48454E),
 )
 
 val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF6C63FF),
+    primary = Color(0xFF5B52D6),
     onPrimary = Color.White,
 
-    primaryContainer = Color(0xffE8E6FF),
+    primaryContainer = Color(0xFFE8E6FF),
+    onPrimaryContainer = Color(0xFF211B5F),
 
-    secondary = Color(0xFF00BFA6),
-    onSecondary = Color.Black,
+    secondary = Color(0xFF6C63FF),
+    onSecondary = Color.White,
 
     tertiary = Color(0xFF403E8E),
+    onTertiary = Color.White,
 
     background = Color(0xFFF8F9FB),
     onBackground = Color(0xFF1A1A1A),
@@ -44,7 +48,7 @@ val LightColorScheme = lightColorScheme(
     surface = Color.White,
     onSurface = Color(0xFF1A1A1A),
 
-    outline = Color(0xFFE0E0E0),
+    outline = Color(0xFFE0DDE5),
 )
 
 @Composable

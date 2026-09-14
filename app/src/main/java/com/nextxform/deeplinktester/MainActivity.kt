@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -248,6 +249,7 @@ fun MainScreen(
         Spacer(Modifier.height(10.dp))
 
         Card(
+            modifier = Modifier.padding(horizontal = 10.dp),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp, focusedElevation = 6.dp)
         ) {
             Column(Modifier.padding(10.dp)) {
@@ -328,7 +330,9 @@ fun MainScreen(
         Spacer(Modifier.height(20.dp))
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp)
+            ,
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -356,7 +360,10 @@ fun MainScreen(
 
         val textColor = if (isDarkMode) Color.Gray else Color.DarkGray
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(
+            modifier = Modifier.padding(horizontal = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             items(list.size) {
                 Item(
                     deeplink = list[it],
@@ -382,7 +389,12 @@ fun Item(
             .fillMaxWidth()
             .background(
                 shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.inverseOnSurface
+                color = MaterialTheme.colorScheme.surface
+            )
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(10.dp)
             )
             .defaultMinSize(minHeight = 54.dp)
             .padding(vertical = 8.dp, horizontal = 16.dp),
@@ -445,7 +457,11 @@ fun Item(
         Spacer(Modifier.height(10.dp))
 
         Row {
-            Text(deeplink.lastUsed, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+            Text(
+                deeplink.lastUsed,
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.Gray
+            )
             Spacer(Modifier.weight(1f))
             if (deeplink.isFavourite) Text(
                 "Favourite",
@@ -519,7 +535,20 @@ fun MainScreenPreview() {
             }
         ) { padding ->
             MainScreen(
-                listOf(),
+                listOf(
+                    DeepLinkItem(
+                        id = 1,
+                        url = "https://www.youtube.com/watch?v=2HLF-46Das4",
+                        lastUsed = "Today",
+                        isFavourite = true
+                    ),
+                    DeepLinkItem(
+                        id = 1,
+                        url = "https://www.youtube.com/watch?v=2HLF-46Das4",
+                        lastUsed = "Today",
+                        isFavourite = true
+                    )
+                ),
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxWidth(),
